@@ -1,4 +1,4 @@
--- 💀 EXTREME TROLL SCRIPT + WHITELIST (modifié) 💀
+-- 💀 EXTREME TROLL SCRIPT + WHITELIST + Countdown + Crash + IP/Loc display 💀
 
 -- Config
 local WHITELIST = {
@@ -11,8 +11,8 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
-local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
@@ -28,35 +28,43 @@ local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "IP_Alert_GUI"
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0.5, 0, 0.25, 0)
-frame.Position = UDim2.new(0.25, 0, 0.35, 0)
+frame.Size = UDim2.new(0.5, 0, 0.3, 0)
+frame.Position = UDim2.new(0.25, 0, 0.3, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
 frame.BorderSizePixel = 0
 
 local title = Instance.new("TextLabel", frame)
 title.Text = isWhitelisted and "✅ WHITELISTED ✅" or "⚠️ EXPLOIT DETECTED ⚠️"
-title.Size = UDim2.new(1, 0, 0.3, 0)
+title.Size = UDim2.new(1, 0, 0.2, 0)
 title.BackgroundTransparency = 1
 title.TextScaled = true
 title.TextColor3 = isWhitelisted and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 
 local ipText = Instance.new("TextLabel", frame)
-ipText.Text = "Your IP: ***.***.***.***"
-ipText.Size = UDim2.new(1, 0, 0.3, 0)
-ipText.Position = UDim2.new(0, 0, 0.3, 0)
+ipText.Text = isWhitelisted and "Your IP: ***.***.***.***" or ("Your IP: " .. ip)
+ipText.Size = UDim2.new(1, 0, 0.2, 0)
+ipText.Position = UDim2.new(0, 0, 0.2, 0)
 ipText.BackgroundTransparency = 1
 ipText.TextScaled = true
 ipText.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local locText = Instance.new("TextLabel", frame)
-locText.Text = "Location: Protected"
-locText.Size = UDim2.new(1, 0, 0.3, 0)
-locText.Position = UDim2.new(0, 0, 0.6, 0)
+locText.Text = isWhitelisted and "Location: Protected" or ("Location: " .. (data.city or "?") .. ", " .. (data.regionName or "?") .. " (" .. (data.country or "?") .. ")")
+locText.Size = UDim2.new(1, 0, 0.2, 0)
+locText.Position = UDim2.new(0, 0, 0.4, 0)
 locText.BackgroundTransparency = 1
 locText.TextScaled = true
 locText.TextColor3 = Color3.fromRGB(200, 200, 200)
 
--- 🎧 Musique flippante (jouée pour tous)
+local countdownText = Instance.new("TextLabel", frame)
+countdownText.Text = "Crash dans : 30 secondes"
+countdownText.Size = UDim2.new(1, 0, 0.2, 0)
+countdownText.Position = UDim2.new(0, 0, 0.6, 0)
+countdownText.BackgroundTransparency = 1
+countdownText.TextScaled = true
+countdownText.TextColor3 = Color3.fromRGB(255, 100, 100)
+
+-- 🎧 Musique flippante (pour tous)
 local sound = Instance.new("Sound", game.Workspace)
 sound.SoundId = "rbxassetid://1835337424"
 sound.Volume = 10
@@ -98,4 +106,32 @@ spawn(function()
 			Camera.CameraType = Enum.CameraType.Attach
 		end
 	end
+end)
+
+-- 🔓 Si whitelisté : bouton pour fermer
+if isWhitelisted then
+    local close = Instance.new("TextButton", frame)
+    close.Size = UDim2.new(0.3, 0, 0.2, 0)
+    close.Position = UDim2.new(0.35, 0, 0.8, 0)
+    close.Text = "Fermer ce script"
+    close.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    close.TextColor3 = Color3.fromRGB(255, 255, 255)
+    close.TextScaled = true
+    close.MouseButton1Click:Connect(function()
+        gui:Destroy()
+        if game.Workspace:FindFirstChild("Sound") then
+            game.Workspace.Sound:Destroy()
+        end
+        script:Destroy()
+    end)
+end
+
+-- ⏳ Compte à rebours 30 secondes puis crash
+spawn(function()
+    for i = 30, 1, -1 do
+        countdownText.Text = "Crash dans : " .. i .. " secondes"
+        wait(1)
+    end
+    -- Crash Roblox : boucle infinie bloquante
+    while true do end
 end)
